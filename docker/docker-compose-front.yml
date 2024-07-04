@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+    nginx:
+        image: pipe.mbk.ru:5000/nginx:lecta-site
+        container_name: nginx-lumber
+        restart: unless-stopped
+        tty: true
+        command: nginx -g "daemon off;"
+        ports:
+            - "8081:8080"
+        volumes:
+            - ./../www:/var/www:cached
+            - ./../docker/nginx/conf.d/:/etc/nginx/conf.d/:cached
+        depends_on:
+            - php
+        networks:
+            - lumber-net
+
+    postgre:
+        image: postgres:15.5-bullseye
+        container_name: postgre-lumber
+        restart: unless-stopped
+        env_file:
+            - ./../.env
+        ports:
+            - "54321:5432"
+        healthcheck:
+            test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
+            interval: 5s
+            timeout: 60s
+            retries: 5
+        networks:
+            - lumber-net
+
+
+networks:
+    lumber-net:
+        external: true

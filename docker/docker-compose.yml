@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+    java-backend:
+        image:
+        container_name: java-backend-lumber
+        restart: unless-stopped
+        networks:
+            - lumber-net
+
+    java-admin:
+        image:
+        container_name: java-admin-lumber
+        networks:
+            - lumber-net
+
+
+networks:
+    lumber-net:
+        external: true
