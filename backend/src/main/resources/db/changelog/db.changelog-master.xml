@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+
+    <changeSet id="CREATE_USER_TABLE" author="piatrouski">
+        <sql>CREATE TYPE USER_ROLE_ENUM AS ENUM ('SYSTEM', 'ADMIN', 'CLIENT', 'USER')</sql>
+        <createTable tableName="users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"
+                             primaryKeyName="PK_USER_ID"
+                             nullable="false"/>
+            </column>
+            <column name="optlock" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(63)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="full_name" type="varchar(127)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varchar(127)">
+                <constraints unique="true"/>
+            </column>
+            <column name="password" type="varchar(127)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="avatar_url" type="varchar(127)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="role" type="USER_ROLE_ENUM">
+                defaultValue="USER"
+                type="USER_ROLE_ENUM">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="ADD_CREATOR_MODIFIER_REMOVER_TO_USER_TABLE" author="piatrouski">
+        <addColumn tableName="users">
+            <column name="enabled" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator_id" type="BIGINT">
+                <constraints references="users(id)" foreignKeyName="FK_CREATOR_ID__USER_ID" nullable="false"/>
+            </column>
+            <column name="created_on" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modifier_id" type="BIGINT">
+                <constraints references="users(id)" foreignKeyName="FK_MODIFIER_ID__USER_ID" nullable="false"/>
+            </column>
+            <column name="modified_on" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="remover_id" type="BIGINT">
+                <constraints references="users(id)" foreignKeyName="FK_REMOVER_ID__USER_ID" nullable="true"/>
+            </column>
+            <column name="remove_on" type="datetime"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="INSERT_DEFAULT_ADMIN" author="piatrouski">
+        <sql>
+            INSERT INTO "users" (name, password, full_name, email, role,
+                                 creator_id, created_on, modifier_id, modified_on, optlock)
+            VALUES ('system', '$2a$12$K24Xtenf3I2CJMhPhfPdle.8D2uOTQ3R1wdMmi2EUk5PGF.Bpe30u', 'system',
+                    'system@email.com', 'SYSTEM', 1, NOW(), 1, NOW(), 0),
+                   ('admin', '$2a$12$YnqVSM4mmrHQYRqq73tyAuPhHK4w6//IAcVAi54q7ktwGMeTFxGDK', 'admin',
+                    'admin@email.com', 'ADMIN', 1, NOW(), 1, NOW(), 0)
+        </sql>
+    </changeSet>
+
+<!--    <changeSet id="create_equipment_table" author="piatrouski">-->
+<!--        <createTable tableName="equipment">-->
+<!--            <column name="id" type="BIGINT" autoIncrement="true">-->
+<!--                <constraints primaryKey="true"-->
+<!--                             primaryKeyName="PK_EQUIPMENT_ID"-->
+<!--                             nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="name" type="varchar(63)">-->
+<!--                <constraints nullable="false" unique="true"/>-->
+<!--            </column>-->
+<!--            <column name="description" type="varchar(1023)">-->
+<!--            </column>-->
+<!--            <column name="enabled" type="boolean" defaultValueBoolean="true">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="creator_id" type="BIGINT">-->
+<!--                <constraints references="users(id)" foreignKeyName="FK_CREATOR_ID__USER_ID" nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="created_on" type="datetime">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="modifier_id" type="BIGINT">-->
+<!--                <constraints references="users(id)" foreignKeyName="FK_MODIFIER_ID__USER_ID" nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="modified_on" type="datetime">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="remover_id" type="BIGINT">-->
+<!--                <constraints references="users(id)" foreignKeyName="FK_REMOVER_ID__USER_ID" nullable="true"/>-->
+<!--            </column>-->
+<!--            <column name="remove_on" type="datetime"/>-->
+<!--            <column name="optlock" type="BIGINT" defaultValueNumeric="0">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+<!--        </createTable>-->
+<!--    </changeSet>-->
+
+<!--    <changeSet id="insert_default_equipment" author="piatrouski">-->
+<!--        <sql>-->
+<!--            INSERT INTO "equipment" (name,-->
+<!--                                     creator_id, created_on, modifier_id, modified_on, optlock)-->
+<!--            VALUES ('Turning machine', 1, NOW(), 1, NOW(), 0),-->
+<!--                   ('Milling machine', 1, NOW(), 1, NOW(), 0),-->
+<!--                   ('Grinding machine', 1, NOW(), 1, NOW(), 0)-->
+<!--        </sql>-->
+<!--    </changeSet>-->
+
+<!--    <changeSet id="create_orders_table" author="piatrouski">-->
+<!--        <createTable tableName="orders">-->
+<!--            <column name="id" type="BIGINT" autoIncrement="true">-->
+<!--                <constraints primaryKey="true"-->
+<!--                             primaryKeyName="PK_ORDER_ID"-->
+<!--                             nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="short_description" type="varchar(128)">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="full_description" type="varchar(1024)">-->
+<!--            </column>-->
+<!--            <column name="executor_id" type="BIGINT">-->
+<!--                <constraints references="users(id)" foreignKeyName="FK_EXECUTOR_ID__USER_ID"/>-->
+<!--            </column>-->
+<!--            <column name="enabled" type="boolean" defaultValueBoolean="true">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="creator_id" type="BIGINT">-->
+<!--                <constraints references="users(id)" foreignKeyName="FK_CREATOR_ID__USER_ID" nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="created_on" type="datetime">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="modifier_id" type="BIGINT">-->
+<!--                <constraints references="users(id)" foreignKeyName="FK_MODIFIER_ID__USER_ID" nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="modified_on" type="datetime">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="remover_id" type="BIGINT">-->
+<!--                <constraints references="users(id)" foreignKeyName="FK_REMOVER_ID__USER_ID" nullable="true"/>-->
+<!--            </column>-->
+<!--            <column name="remove_on" type="datetime"/>-->
+<!--            <column name="optlock" type="BIGINT" defaultValueNumeric="0">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+<!--        </createTable>-->
+<!--    </changeSet>-->
+
+<!--    <changeSet id="create_map_order_to_equipment_table" author="piatrouski">-->
+<!--        <createTable tableName="map_order_to_equipment">-->
+<!--            <column name="order_id" type="BIGINT">-->
+<!--                <constraints references="orders(id)"-->
+<!--                             foreignKeyName="FK_MAP_ORDER_TO_EQUEPMENT__ORDER_ID"-->
+<!--                             nullable="false" primaryKey="true"/>-->
+<!--            </column>-->
+<!--            <column name="equipment_id" type="BIGINT">-->
+<!--                <constraints references="equipment(id)"-->
+<!--                             foreignKeyName="FK_MAP_ORDER_TO_EQUEPMENT__EQUEPMENT_ID"-->
+<!--                             nullable="false" primaryKey="true"/>-->
+<!--            </column>-->
+<!--        </createTable>-->
+<!--    </changeSet>-->
+
+<!--    <changeSet id="create_map_order_to_challengers_table" author="piatrouski">-->
+<!--        <createTable tableName="map_order_to_challengers">-->
+<!--            <column name="order_id" type="BIGINT">-->
+<!--                <constraints references="orders(id)"-->
+<!--                             foreignKeyName="FK_MAP_ORDER_TO_CHALLENGERS__ORDER_ID"-->
+<!--                             nullable="false" primaryKey="true"/>-->
+<!--            </column>-->
+<!--            <column name="user_id" type="BIGINT">-->
+<!--                <constraints references="users(id)"-->
+<!--                             foreignKeyName="FK_MAP_ORDER_TO_CHALLENGERS__USER_ID"-->
+<!--                             nullable="false" primaryKey="true"/>-->
+<!--            </column>-->
+<!--        </createTable>-->
+<!--    </changeSet>-->
+</databaseChangeLog>

@@ -1,2 +1,4 @@
 rootProject.name = 'vagonka'
 
+include 'backend'
+include 'backend-admin'

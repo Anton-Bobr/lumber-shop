@@ -13,7 +13,7 @@ services:
             - ./../www:/var/www:cached
             - ./../docker/nginx/conf.d/:/etc/nginx/conf.d/:cached
         depends_on:
-            - php
+            - postgre
         networks:
             - lumber-net
 
@@ -22,9 +22,13 @@ services:
         container_name: postgre-lumber
         restart: unless-stopped
         env_file:
-            - ./../.env
+            - .env
         ports:
             - "54321:5432"
+        environment:
+            POSTGRES_DB: lumber-db
+            POSTGRES_USER: user
+            POSTGRES_PASSWORD: user
         healthcheck:
             test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
             interval: 5s
